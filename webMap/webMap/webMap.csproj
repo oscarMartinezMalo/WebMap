@@ -77,6 +77,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="default.css" />
+    <Content Include="icon\Diamond.png" />
     <Content Include="index.html" />
     <None Include="Scripts\jquery-2.2.3.intellisense.js" />
     <Content Include="Scripts\JavaScript.js" />

@@ -6,7 +6,8 @@ $(document).ready(function () {
 
 function getLocation() {
     if (supportsGeolovation) {
-        witchId = navigator.geolocation.getCurrentPosition(showPosition, showError);
+        var options = { enableHighAccuracy: true };
+        witchId = navigator.geolocation.getCurrentPosition(showPosition, showError, options);
     } else {
         showMessage("GeoLocation is not supported by this Browser");
     }
@@ -17,26 +18,48 @@ function supportsGeolovation() {
     return 'geolocation' in navigator;
 }
 
+
+var map;
+var service;
+
+
 function showPosition(position) {
-   
-    var mapCanvas = document.getElementById('message');
-    var coords = new google.maps.LatLng(position.coords.latitude, position.coords.longitude); 
-    var options = {
-        zoom: 13,
-        center: coords,
-        mapTypeControl: false,
-        navigationControlOption: {
-            style: google.maps.NavigationControlStyle.SMALL
-        },
-        mapTypeId: google.maps.MapTypeId.ROADMAP
+    var mapCanvas = document.getElementById('map');
+    var coords = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+    var options = { zoom: 13, center: coords, mapTypeControl: true, navigationControlOption: { style: google.maps.NavigationControlStyle.SMALL }, mapTypeId: google.maps.MapTypeId.ROADMAP };
+
+    map = new google.maps.Map(mapCanvas, options);
+
+    //This is your current location
+    var marker = new google.maps.Marker({ position: coords, map: map, title: "You are here!" });
+
+    service = new google.maps.places.PlacesService(map);
+    google.maps.event.addListenerOnce(map, 'bounds_changed', performSearch);
+}
+
+
+
+// search all burguer Kings
+function performSearch() {
+    var request = {
+        bounds: map.getBounds(),
+        keyword: 'burger king'
     };
-    var map = new google.maps.Map(mapCanvas, options); 
-    var marker = new google.maps.Maker({
-        position: coords,
-        map: map,
-        title:"You are here!"
-    });
-    
+    service.radarSearch(request, handleSearchResult);
+}
+
+// takes all the burgerKings and display them in the map
+function handleSearchResult(results, status) {
+    //if (status == google.maps.places.PlacesService.OK) {
+        for (var i = 0; i < results.length; i++) {
+            var marker = new google.maps.Marker({ position: results[i].geometry.location, map: map, icon: 'icon/Diamond.png' });
+        //}
+    }
+}
+
+
+function showMessage(message) {
+    $('#message').html(message);
 }
 
 function showError(error) {
@@ -57,6 +80,3 @@ function showError(error) {
     }
 }
 
-function showMessage(message) {
-    $('#message').html(message);
-}
